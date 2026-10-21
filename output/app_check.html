@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Customs App Check</title>
+  <style>
+    :root {
+      --blue: #00356b;
+      --ink: #1d1d1d;
+      --muted: #5f6670;
+      --line: #dde3ea;
+      --soft: #f5f8fc;
+      --pass: #1d7a36;
+      --pass-bg: #e3f6e6;
+      --fail: #b3261e;
+      --fail-bg: #fdeceb;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; color: var(--ink); font: 16px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    main { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+    header { border-bottom: 3px solid var(--blue); padding-bottom: 16px; margin-bottom: 24px; }
+    h1 { color: var(--blue); margin: 0 0 4px; font-size: 1.9rem; }
+    h2 { color: var(--blue); margin: 0; font-size: 1.4rem; }
+    h3 { margin: 18px 0 6px; font-size: 1rem; color: var(--blue); }
+    .meta { color: var(--muted); margin: 0; font-size: 0.95rem; }
+    .badge { display: inline-block; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.04em; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
+    .badge.pass { background: var(--pass-bg); color: var(--pass); border: 1px solid #b7e3c0; }
+    .badge.fail { background: var(--fail-bg); color: var(--fail); border: 1px solid #f3c2bf; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+    th, td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+    th { background: var(--soft); color: var(--blue); }
+    .table-wrap { overflow-x: auto; }
+    .table-wrap table { min-width: 560px; }
+    .summary { margin-bottom: 32px; }
+    .summary td:last-child { width: 1%; }
+    .check { border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 28px; }
+    .check-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px; }
+    .check-head p { margin: 4px 0 0; color: var(--muted); font-size: 0.92rem; }
+    .steps { margin: 0; padding-left: 20px; }
+    .steps li { margin: 2px 0; }
+    .quote { background: var(--soft); border-left: 4px solid var(--blue); padding: 8px 12px; margin: 6px 0; font-size: 0.92rem; }
+    figure { margin: 14px 0; }
+    figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
+    figcaption { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+    .two-up { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .proves { background: #eef4fb; border: 1px solid #c9daf0; border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+    .proves strong { color: var(--blue); }
+    .proves p { margin: 4px 0 0; }
+    .result-line { margin-top: 12px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .note { font-size: 0.88rem; color: var(--muted); }
+    code { background: var(--soft); padding: 1px 5px; border-radius: 4px; font-size: 0.88em; }
+    @media (max-width: 700px) { .two-up { grid-template-columns: 1fr; } h1 { font-size: 1.5rem; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Campus Customs: App Check (Problem 11)</h1>
+    <p class="meta">MGT 409 Homework 4 · Tested October 21, 2026 · Site: React + Vite frontend (<code>localhost:5173</code>) with FastAPI + PydanticAI backend (<code>localhost:8000</code>) · Database: <code>data/campus_customs.db</code></p>
+  </header>
+
+  <section class="summary">
+    <h2>Summary</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Check</th><th>What was tested</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Chat inventory check</td><td>Chat gives honest stock and price for a specific item and size, matching the database</td><td><span class="badge pass">✅ PASS</span></td></tr>
+        <tr><td>2</td><td>Dynamic search-result cards</td><td>Asking "What hoodies do you have?" makes matching product cards appear on the page</td><td><span class="badge pass">✅ PASS</span></td></tr>
+        <tr><td>3</td><td>Usability feature (Problem 9): Compare products</td><td>After 15 seconds on a product page, the bulldog offers a comparison and shows 3 similar items with price differences</td><td><span class="badge pass">✅ PASS</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ===================================================== CHECK 1 -->
+  <section class="check" id="check-1">
+    <div class="check-head">
+      <div>
+        <h2>Check 1: Chat checks the inventory level of an item</h2>
+        <p>Goal: the chatbot reports honest stock (by size) and price taken from the database, and handles a sold-out size correctly.</p>
+      </div>
+      <span class="badge pass">✅ PASS</span>
+    </div>
+
+    <h3>Steps</h3>
+    <ol class="steps">
+      <li>Opened the site as a guest and opened the bulldog chat (bottom right).</li>
+      <li>Asked:
+        <div class="quote">"How many Davenport College Crewnecks do you have in size M and size S, and how much are they?"</div>
+      </li>
+      <li>Compared the reply with the database and with the product page's stock table.</li>
+    </ol>
+
+    <div class="two-up">
+      <figure>
+        <img src="app_check_images/inventory.png" alt="Chat window: the shopper asks about Davenport College Crewneck stock in M and S; the bot replies $58.00, 5 in size M, size S sold out (0 available), and offers a back-in-stock email.">
+        <figcaption>Figure 1a: Chat question and the bot's reply.</figcaption>
+      </figure>
+      <figure>
+        <img src="app_check_images/inventory_db.png" alt="Davenport College Crewneck product page showing $58.00 and a stock table: XS 20, S Sold out, M 5, L 12, XL 20, XXL 8.">
+        <figcaption>Figure 1b: Product page stock table for the same item (read straight from the <code>inventory</code> table).</figcaption>
+      </figure>
+    </div>
+
+    <h3>Database check</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Field</th><th>Database (<code>catalogue</code> / <code>inventory</code>)</th><th>Bot said</th><th>Match?</th></tr></thead>
+      <tbody>
+        <tr><td>Price</td><td>$58.00</td><td>"$58.00"</td><td>✅</td></tr>
+        <tr><td>Size M quantity</td><td>5</td><td>"There are 5 in size M"</td><td>✅</td></tr>
+        <tr><td>Size S quantity</td><td>0</td><td>"size S is sold out (0 available)—sorry about that!"</td><td>✅</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Full reply: "The Davenport College Crewneck is $58.00. There are 5 in size M, while size S is sold out (0 available)—sorry about that! Other sizes are in stock. Would you like us to email you when size S is back?" It also added a dog joke and a product card with a "Sold out in S" badge.</p>
+
+    <div class="proves">
+      <strong>What the screenshots prove:</strong>
+      <p>The chatbot answered with the exact price ($58.00) and size-level stock (5 in M, 0 in S) stored in the database, matching the product page's stock table instead of guessing. It also told the shopper honestly that size S is sold out, apologized, and offered a back-in-stock email, as our out-of-stock rules require.</p>
+    </div>
+    <p class="result-line">Result: <span class="badge pass">✅ PASS</span></p>
+  </section>
+
+  <!-- ===================================================== CHECK 2 -->
+  <section class="check" id="check-2">
+    <div class="check-head">
+      <div>
+        <h2>Check 2: Dynamic search-result cards after a category question</h2>
+        <p>Goal: asking about a category ("hoodies") makes the agent return structured matches, which appear on the page as product cards (image, name, price, short info), 5 at a time with "See more".</p>
+      </div>
+      <span class="badge pass">✅ PASS</span>
+    </div>
+
+    <h3>Steps</h3>
+    <ol class="steps">
+      <li>Opened the home page and the chat.</li>
+      <li>Asked:
+        <div class="quote">"What hoodies do you have?"</div>
+      </li>
+      <li>Checked the "Bulldog's picks" panel that appeared at the top of the page, then closed the chat to see all 5 cards in one row.</li>
+    </ol>
+
+    <div class="two-up">
+      <figure>
+        <img src="app_check_images/search_cards.png" alt="Home page with a 'Bulldog's picks: Yale Hoodies, Showing 5 of 27 matches' panel of hoodie cards; the chat says 'I found 27 Yale hoodies, priced from $45 to $88. I've put the top 5 on the page… Want to see more?'">
+        <figcaption>Figure 2a: The chat answer and the cards appearing on the page.</figcaption>
+      </figure>
+      <figure>
+        <img src="app_check_images/search_cards_full.png" alt="All 5 hoodie cards in a row: Basic Hoodie Big Yale $68, Brooks Brothers Double Knit Full Zip Hoodie Yale $88, Champion Full Zip Hood $88, Champion Reverse Weave Hoodie 1 $68, Crew Left Chest Hoodie $68, with a 'See more (22 more)' button.">
+        <figcaption>Figure 2b: All 5 product cards with the "See more (22 more)" button.</figcaption>
+      </figure>
+    </div>
+
+    <h3>Database check</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Item</th><th>Database</th><th>Site</th><th>Match?</th></tr></thead>
+      <tbody>
+        <tr><td>Number of hoodies (garment type contains "hood")</td><td>27</td><td>"Showing 5 of 27 matches" / "I found 27 Yale hoodies"</td><td>✅</td></tr>
+        <tr><td>Hoodie price range</td><td>$45 to $88</td><td>"priced from $45 to $88"</td><td>✅</td></tr>
+        <tr><td>Cards are all hoodies</td><td>Pullover hoodie, full-zip hooded sweatshirt, hoodie</td><td>5 cards, each labeled with a hoodie type</td><td>✅</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note"><strong>Issue found and fixed during this check:</strong> on the first run, the cards appeared correctly but the bot said hoodies were "from $68 to $88", which missed the two $45 hoodies (it only looked at the top search results). We updated the <code>search_products</code> tool to also return the lowest and highest price across <em>all</em> matches and told the agent to use them. On the re-test (shown above) it correctly said "$45 to $88".</p>
+
+    <div class="proves">
+      <strong>What the screenshots prove:</strong>
+      <p>A plain category question in the chat made the agent return structured product matches, and the website showed them as product cards (image, type, name, price, short description, sizes) in a "Bulldog's picks" panel on the page. The panel shows 5 of 27 hoodies with a "See more" button, and the counts and prices match the database.</p>
+    </div>
+    <p class="result-line">Result: <span class="badge pass">✅ PASS</span></p>
+  </section>
+
+  <!-- ===================================================== CHECK 3 -->
+  <section class="check" id="check-3">
+    <div class="check-head">
+      <div>
+        <h2>Check 3: Usability feature from Problem 9, comparing products</h2>
+        <p>Goal: if a shopper stays on a product page for 15 seconds, the bulldog offers to compare it; on "Yes", the agent compares it with 3 similar products, including price.</p>
+      </div>
+      <span class="badge pass">✅ PASS</span>
+    </div>
+
+    <h3>Steps</h3>
+    <ol class="steps">
+      <li>Opened the <strong>Basic Hoodie Big Yale</strong> product page and did nothing.</li>
+      <li>About 15 seconds later the chat opened by itself with a comparison offer (Figure 3a).</li>
+      <li>Clicked <strong>⚖️ Yes, compare</strong> and checked the comparison table (Figure 3b) against the database.</li>
+    </ol>
+
+    <div class="two-up">
+      <figure>
+        <img src="app_check_images/compare_prompt.png" alt="Product page for Basic Hoodie Big Yale with the chat open by itself: 'Looking at: Basic Hoodie Big Yale' and 'Still deciding on the Basic Hoodie Big Yale? I can compare it with 3 similar items, including price… Want me to?' with Yes, compare and No thanks buttons.">
+        <figcaption>Figure 3a: The automatic 15-second comparison offer.</figcaption>
+      </figure>
+      <figure>
+        <img src="app_check_images/compare_table.png" alt="Hoodie comparison table in the chat: Basic Hoodie Big Yale $68 (viewing), Yale Sports Hoodie Tennis $45 ($23 less), The Forest School Hoodie $68 (same price), Champion Full Zip Hood $88 ($20 more), with sizes in stock for each.">
+        <figcaption>Figure 3b: The comparison table after clicking "Yes, compare".</figcaption>
+      </figure>
+    </div>
+
+    <h3>Database check</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Product</th><th>Database price</th><th>Database sizes in stock</th><th>Table shows</th><th>Match?</th></tr></thead>
+      <tbody>
+        <tr><td>Basic Hoodie Big Yale (viewing)</td><td>$68.00</td><td>XS–XXL</td><td>$68.00 · viewing · XS–XXL</td><td>✅</td></tr>
+        <tr><td>Yale Sports Hoodie Tennis</td><td>$45.00</td><td>XS–XXL</td><td>$45.00 · $23 less · XS–XXL</td><td>✅</td></tr>
+        <tr><td>The Forest School Hoodie</td><td>$68.00</td><td>L, XL, XXL</td><td>$68.00 · same price · L · XL · XXL</td><td>✅</td></tr>
+        <tr><td>Champion Full Zip Hood</td><td>$88.00</td><td>XS–XXL</td><td>$88.00 · $20 more · XS–XXL</td><td>✅</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">The agent's summary: "The Basic Hoodie Big Yale is $68.00 and is available in every size from XS through XXL. The Yale Sports Hoodie Tennis is the cheapest at $45.00, while the Champion Full Zip Hood is a premium option at $88.00; The Forest School Hoodie is also $68.00 but currently has only L, XL, and XXL in stock."</p>
+
+    <div class="proves">
+      <strong>What the screenshots prove:</strong>
+      <p>The site noticed the shopper had been looking at one product for 15 seconds, and the bulldog proactively offered help, already knowing which product was on screen ("Looking at: Basic Hoodie Big Yale"). After "Yes, compare", the agent showed 3 similar hoodies (a cheaper, a same-price, and a premium option) with correct prices, price differences, and sizes from the database.</p>
+    </div>
+    <p class="result-line">Result: <span class="badge pass">✅ PASS</span></p>
+  </section>
+
+  <p class="note">Screenshots are in <code>output/app_check_images/</code>. All checks were run on the live local site; database values were read with read-only SQL queries against <code>data/campus_customs.db</code>.</p>
+</main>
+</body>
+</html>
