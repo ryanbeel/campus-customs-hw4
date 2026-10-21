@@ -218,3 +218,7 @@ This file records the prompts I gave my vibe coder for each problem.
 > README.md should explain how to run the front end and back end after placing the data pack.
 >
 > *(Attached: expected file layout: hw4/ with AI_prompts.md, requirements.txt, .env.example, .gitignore, README.md, frontend/, backend/ (main.py, agent.py, models.py, tools.py, prompts/prompt.md), output/ (harness.md, design.md, usability.md, app_check.html, app_check_images/, audit_trail.json); local-only data pack: data/campus_customs.db and data/products/.)*
+
+**Prompt 2:**
+
+> cool. 1) has this been pushed to the public github repository? 2) can you please provide the repo URL that I need to submit as my assignment (the link that graders can open and clone)?
